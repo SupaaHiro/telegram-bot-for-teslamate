@@ -37,6 +37,25 @@ Build and execute locally (debian 9, console)
  - Manually launch the bot
     npm run start
 
+Build a docker image (debian 9, console)
+   - Build the docker image
+    docker build -t user/telegram-bot-for-teslamate .
+   - Check images list
+    docker images
+   - Run the docker
+    docker run -d user/telegram-bot-for-teslamate
+   - Check process
+    docker ps
+   
+   If the docker crashes try run without detaching the terminal
+     docker run user/telegram-bot-for-teslamate
+
+   You can also attach terminal with this command
+    docker attach --sig-proxy=false e98ff710caf7
+   NB. --sig-proxy=false to prevent signals being passed to container, otherwise hitting Ctrl-c will kill your container !
+   
+   To detach from an attached container, successively hit CTRL-P then CTRL-q or alternatively CTRL+C
+
 Advanced configurations
   - MQTT over TSL
     If the MQTT broker is not local, be sure to use TSL and setup user/password authentication !
