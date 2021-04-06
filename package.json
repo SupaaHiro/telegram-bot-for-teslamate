@@ -9,7 +9,7 @@
     "start": "cd dist && node --experimental-json-modules index.js --verbose"
   },
   "author": "Supaahiro (https://github.com/SupaaHiro)",
-  "license": "ISC",
+  "license": "SEE LICENSE IN <LICENSE>",
   "dependencies": {
     "mqtt": "^4.2.6",
     "proper-lockfile": "^4.1.2",
