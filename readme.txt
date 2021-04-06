@@ -12,7 +12,7 @@ Requisites
  - Configure telegram.json
  - Configure mqtt-client.json
 
-Build and execute locally (development, windows/visual code)
+Build and execute locally (development, windows/visual studio code)
  - Install dev dependencies
     npm install dev
  - Install TypeScript
