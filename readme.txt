@@ -5,6 +5,10 @@ Requisites
     Requirements:
      - VPS must have a static IP
      - Second level domain with DNS management included
+
+    Pay attention when you configure Google VPS, only the f1-micro is free!
+    Even with the free tier, I got few extra charges. So I bought a cheap VPS at contabo https://contabo.com/en/vps/
+
  - Create a telegram account, in case you don't have one yet (https://telegram.org/)
  - Retrieve your chat ID by contacting the IDBot (@myidbot)
  - Create a new bot by contacting the BotFather (@BotFather)
