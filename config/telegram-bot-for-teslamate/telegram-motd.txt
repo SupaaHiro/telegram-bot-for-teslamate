@@ -6,3 +6,4 @@ Temperature inside is ${teslamate/cars/1/inside_temp} ${mu_temperature}, and out
 
 Software version is ${teslamate/cars/1/version}, Odometer ${teslamate/cars/1/odometer} ${mu_distance}
 
+This is art. You will hear a buzzer. When you hear the buzzer, stare at the art. [BUZZER]

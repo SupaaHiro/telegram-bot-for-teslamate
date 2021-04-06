@@ -1,0 +1,2 @@
+To create a password file you need to use mosquitto_passwd tool,
+see https://mosquitto.org/man/mosquitto_passwd-1.html for more info.

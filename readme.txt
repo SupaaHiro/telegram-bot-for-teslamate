@@ -13,54 +13,56 @@ Requisites
  - Retrieve your chat ID by contacting the IDBot (@myidbot)
  - Create a new bot by contacting the BotFather (@BotFather)
     Detailed guide here -> https://www.telegram-group.com/en/blog/create-bot-telegram/
- - Configure telegram.json
- - Configure mqtt-client.json
+ - Modify config/telegram-bot-for-teslamate/telegram.json
+ - Modify config/telegram-bot-for-teslamate/mqtt-client.json
 
-Build and execute locally (development, windows/visual studio code)
- - Install dev dependencies
-    npm install dev
- - Install TypeScript
-    npm install -g typescript@4.2.3
-    tsc --version
- - Rebuild the project with CTRL-SHIFT-B 
- - Copy configuration
-   cp -r config dist/
- - Manually launch the bot
-    npm run start
+Choice one of the following options:
 
-Build and execute locally (debian 9, console)
- - Install dependencies
-    npm install
- - Install TypeScript
-    npm install -g typescript@4.2.3
-    tsc --version
- - Rebuild the project
-    cd node_modules/.bin/ && tsc && cd ../..
- - Copy configuration
-    cp -r config dist/
- - Manually launch the bot
-    npm run start
+Use docker composer with Traefik (https://docs.teslamate.org/docs/guides/traefik/)
+   - Follow this guide (https://docs.teslamate.org/docs/guides/traefik/)
+   - Modify config/.env and config/mosquitto.passwd
+   - Upload config/ into your VPS (e.g. /home/<user>/teslamate)
+   - Execute docker-compose up -d
+
+Use the pre-built docker image (https://hub.docker.com/repository/docker/supaahiro/telegram-bot-for-teslamate, 2021-04-06T21:26:16Z)
+   docker pull supaahiro/telegram-bot-for-teslamate:latest
+   docker cp config/telegram-bot-for-teslamate/. mycontainer:/config/
+   docker run -d supaahiro/telegram-bot-for-teslamate
 
 Build a docker image (debian 9, console)
-   - Build the docker image
-    docker build -t user/telegram-bot-for-teslamate .
-   - Check images list
-    docker images
-   - Run the docker
-    docker run -d user/telegram-bot-for-teslamate
-   - Check process
-    docker ps
-   
-   If the docker crashes try run without detaching the terminal
-     docker run user/telegram-bot-for-teslamate
+   docker build -t supaahiro/telegram-bot-for-teslamate .
+   docker cp config/telegram-bot-for-teslamate/. mycontainer:/config/
+   docker run -d supaahiro/telegram-bot-for-teslamate
 
-   You can also attach terminal with this command
-    docker attach --sig-proxy=false e98ff710caf7
-   NB. --sig-proxy=false to prevent signals being passed to container, otherwise hitting Ctrl-c will kill your container !
-   
-   To detach from an attached container, successively hit CTRL-P then CTRL-q or alternatively CTRL+C
+Build and execute locally (debian 9, console)
+ npm install
+ npm install -g typescript@4.2.3
+ cd node_modules/.bin/ && tsc && cd ../..
+ mkdir dist/config
+ cp -r config/telegram-bot-for-teslamate/ dist/config/
+ npm run start
 
-Advanced configurations
+Build and execute locally (development, windows/visual studio code)
+ npm install dev
+ npm install -g typescript@4.2.3
+
+ Open Visual Studio Code and rebuild the project with CTRL-SHIFT-B 
+ 
+ mkdir dist/config
+ cp -r config/telegram-bot-for-teslamate/ dist/config/
+ npm run start
+
+Advanced configurations & troubleshooting
   - MQTT over TSL
     If the MQTT broker is not local, be sure to use TSL and setup user/password authentication !
     If you have teslamate with traefik check the docker-compose.yml example under config/teslamate
+  
+  - Docker issues    
+    If the docker crashes try run without detaching the terminal
+     docker run supaahiro/telegram-bot-for-teslamate
+
+    You can also attach terminal with this command
+     docker attach --sig-proxy=false e98ff710caf7
+    NB. --sig-proxy=false to prevent signals being passed to container, otherwise hitting Ctrl-c will kill your container !
+   
+    To detach from an attached container, successively hit CTRL-P then CTRL-q or alternatively CTRL+C

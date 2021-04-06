@@ -1,0 +1,6 @@
+{
+  "host": "mqtts://<your subdomain>",
+  "port": 8883,
+  "username": "teslamate",
+  "password": "<your password>"
+}
