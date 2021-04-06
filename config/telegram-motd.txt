@@ -1,0 +1,8 @@
+Ciao!
+
+${teslamate/cars/1/display_name} is ${teslamate/cars/1/state} and SOC level is ${teslamate/cars/1/usable_battery_level}%, est. autonomy ${teslamate/cars/1/est_battery_range_km} ${mu_distance}
+
+Temperature inside is ${teslamate/cars/1/inside_temp} ${mu_temperature}, and outside ${teslamate/cars/1/outside_temp} ${mu_distance}
+
+Software version is ${teslamate/cars/1/version}, Odometer ${teslamate/cars/1/odometer} ${mu_distance}
+

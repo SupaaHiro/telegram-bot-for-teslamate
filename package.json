@@ -1,0 +1,23 @@
+{
+  "name": "telegram-bot-for-teslamate",
+  "version": "1.0.0",
+  "description": "Telegram bot for teslamate",
+  "private": true,
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "cd dist && node --experimental-json-modules index.js --verbose"
+  },
+  "author": "Supaahiro (https://github.com/SupaaHiro)",
+  "license": "ISC",
+  "dependencies": {
+    "mqtt": "^4.2.6",
+    "proper-lockfile": "^4.1.2",
+    "telegraf": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "@types/proper-lockfile": "^4.1.1",
+    "typescript": "^4.2.3"
+  }
+}

@@ -1,0 +1,2 @@
+Generate your password with mosquitto_passwd
+(see https://mosquitto.org/man/mosquitto_passwd-1.html)
