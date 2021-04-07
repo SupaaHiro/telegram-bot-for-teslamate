@@ -20,7 +20,7 @@
     {
       "topic": "teslamate/cars/1/usable_battery_level",
       "test": "<20",
-      "message": "Battery level is below {test}%"
+      "message": "Battery level is below ${test}%"
     },
     {
       "topic": "teslamate/cars/1/state",

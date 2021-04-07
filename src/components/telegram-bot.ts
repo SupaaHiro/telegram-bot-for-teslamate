@@ -1,7 +1,7 @@
 'use strict';
 
 import * as assert from 'assert';
-import { String } from './utils.js';
+import { StringUtils } from './utils.js';
 
 import Application from '../application';
 import BaseComponent from './base-component';
@@ -35,8 +35,8 @@ class TelegramBot implements BaseComponent {
     assert.ok(app, 'app is mandatory');
 
     const botConfig = app.load_json<TelegramBotConfig>('telegram.json');
-    assert.ok(!String.isNullOrEmpty(botConfig.bot_token_id), 'exec: bot_token_id not definited');
-    assert.ok(!String.isNullOrEmpty(botConfig.bot_owner_id), 'exec: bot_owner_id not definited');
+    assert.ok(!StringUtils.isNullOrEmpty(botConfig.bot_token_id), 'exec: bot_token_id not definited');
+    assert.ok(!StringUtils.isNullOrEmpty(botConfig.bot_owner_id), 'exec: bot_owner_id not definited');
 
     this.botConfig = botConfig;
     this.mqttEventsConfig = app.load_json<MQTTEventsConfig>('mqtt-events.json');
@@ -77,7 +77,7 @@ class TelegramBot implements BaseComponent {
 
         // Sent MOTD
         let motd = await this.get_motd();
-        if (!String.isNullOrEmpty(motd))
+        if (!StringUtils.isNullOrEmpty(motd))
           ctx.reply(motd)
       })
 
@@ -114,7 +114,7 @@ class TelegramBot implements BaseComponent {
   private async send_message(message: string, recipient_id?: string) {
     assert.ok(this.bot, 'telegram bot not initialized');
 
-    if (String.isNullOrEmpty(recipient_id))
+    if (StringUtils.isNullOrEmpty(recipient_id))
       recipient_id = this.botConfig.bot_owner_id;
 
     this.bot.telegram.sendMessage(recipient_id, message);
@@ -152,16 +152,17 @@ class TelegramBot implements BaseComponent {
         function (x) {
           if (x.topic !== mqtt_message.topic) return false;
 
-          const regEx = String.toRegEx(x.test);
+          const regEx = StringUtils.toRegEx(x.test);
 
-          // Test regular expression
+          // First, test regular expression
           if (regEx) {
-            console.log('Testing regex for ', x.topic, 'regex:', regEx, 'value:', mqtt_message.value, 'test:', regEx.test(mqtt_message.value));
-            return regEx.test(mqtt_message.value);
+            console.log('Testing regex for', x.topic, 'regex:', regEx, 'value:', mqtt_message.value, 'test:', regEx.test(mqtt_message.value));
+            if (regEx.test(mqtt_message.value)) return true;
           }
+          // Then, do other tests
 
           // Test if value can be anything
-          else if (x.test === '*')
+          if (x.test === '*')
             return true;
 
           // Test if value is below a certain value
@@ -195,7 +196,7 @@ class TelegramBot implements BaseComponent {
 
           return false;
         });
-      if (alerts.length > 0 && !String.isNullOrEmpty(alerts[0].message)) {
+      if (alerts.length > 0 && !StringUtils.isNullOrEmpty(alerts[0].message)) {
         const alert = alerts[0];
         if (alerts.length != 1)
           console.log(`Multiple events configured for ${alert.topic}, picking the first one: ${alert.test}`);
@@ -211,24 +212,32 @@ class TelegramBot implements BaseComponent {
     }
   }
 
+
+  /**
+  * Get MOTD
+  * 
+  */
   async get_motd() {
     if (!this.mqttEventsConfig.motd) return '';
 
     // Sent MOTD
     let motd = this.app.load_txt('telegram-motd.txt');
 
-    motd = String.replaceAll(motd, '${mu_distance}', this.mqttEventsConfig.mu_distance);
-    motd = String.replaceAll(motd, '${mu_temperature}', this.mqttEventsConfig.mu_temperature);
+    motd = StringUtils.replaceAll(motd, '${mu_distance}', this.mqttEventsConfig.mu_distance);
+    motd = StringUtils.replaceAll(motd, '${mu_temperature}', this.mqttEventsConfig.mu_temperature);
 
     this.subscriptions.forEach((x) => motd = motd.replace('${' + x.topic + '}', x.value));
 
     return motd;
   }
 
+  /**
+   * Send MOTD
+   */
   async send_motd() {
     // Sent MOTD
     let motd = await this.get_motd();
-    if (!String.isNullOrEmpty(motd))
+    if (!StringUtils.isNullOrEmpty(motd))
       await this.send_message(motd);
   }
 

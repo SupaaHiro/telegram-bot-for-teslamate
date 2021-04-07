@@ -2,18 +2,20 @@
 
 import * as assert from 'assert';
 import * as fsext from './components/fs-extension.js';
-import { String } from './components/utils.js';
+import { StringUtils } from './components/utils.js';
 
 import MQTTClient from './components/mqtt-client.js';
 import TelegramBot from './components/telegram-bot.js';
 import ApplicationConfig from './config/application-config.js';
+import MQTTMessage from './components/mqtt-message.js';
 
 /**
  * Application main class
  */
 class Application {
-  // static _COMMAND_START_BOT = '';
+  private static _MOTD_DELAY_MS = 5000;
 
+  private config_path: string;
   private config: ApplicationConfig;
   private maplock: Map<string, any>;
   private promises_to_wait: Array<any>;
@@ -27,11 +29,8 @@ class Application {
    *
    * @param {*} argv    Command-line arguments
    */
-  constructor(argv: (string | number)[]) {
-    if (!argv)
-      argv = [];
-
-    this.config = fsext.load_json<ApplicationConfig>('application.json');
+  constructor(config_path: string) {
+    this.config_path = config_path;
     this.maplock = new Map();
     this.promises_to_wait = [];
     this.mqtt_client = null;
@@ -50,8 +49,9 @@ class Application {
     try {
       const self = this;
 
-      assert.ok(this.config, 'initialize: configuration not loaded');
-      assert.ok(!String.isNullOrEmpty(this.config.name), 'initialize: application name not definited');
+      // Load app config
+      this.config = fsext.load_json<ApplicationConfig>('application.json', this.config_path);
+      assert.ok(!StringUtils.isNullOrEmpty(this.config.name), 'initialize: application name not definited');
 
       // Handlers to terminate (semi) gracefully
       process.on('uncaughtException', async (err, origin) => {
@@ -79,10 +79,10 @@ class Application {
         // Enable alerts
         self.telegram_bot.alerts_enabled = true;
 
-        // Send MOTD
+        // Send MOTD (if enabled)
         await self.telegram_bot.send_motd()
 
-      }, 5000);
+      }, Application._MOTD_DELAY_MS);
     }
     catch (ex: unknown) {
       throw ex;
@@ -92,10 +92,10 @@ class Application {
   /**
    * Load a json configuration file from app-root:/config directory
    * 
-   * @param {*} name name
+   * @param {*} filename name
    */
-  load_json<T>(name: string): T {
-    return fsext.load_json(name);
+  load_json<T>(filename: string): T {
+    return fsext.load_json(filename, this.config_path);
   }
 
   /**
@@ -103,8 +103,8 @@ class Application {
    * 
    * @param {*} name name
    */
-  load_txt(name: string): string {
-    return fsext.load_txt(name);
+  load_txt(filename: string): string {
+    return fsext.load_txt(filename, this.config_path);
   }
 
   /**

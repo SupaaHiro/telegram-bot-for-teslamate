@@ -1,4 +1,4 @@
-export class String {
+export class StringUtils {
   /**
    * Test if a string is null or empty
    * 
