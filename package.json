@@ -1,6 +1,6 @@
 {
   "name": "telegram-bot-for-teslamate",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Telegram bot for teslamate",
   "private": true,
   "main": "index.js",
@@ -16,6 +16,7 @@
     "mqtt": "^4.2.6",
     "proper-lockfile": "^4.1.2",
     "telegraf": "^4.3.0",
+    "tracer": "^1.1.4",
     "yargs": "^16.2.0"
   },
   "devDependencies": {

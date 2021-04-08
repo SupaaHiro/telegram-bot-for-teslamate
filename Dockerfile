@@ -6,4 +6,5 @@ COPY dist/. ./
 COPY LICENSE ./
 COPY readme.md ./
 RUN mkdir /config
+RUN mkdir /logs
 CMD [ "node", "index.js" ]

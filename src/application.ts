@@ -2,8 +2,7 @@
 
 import * as assert from 'assert';
 import * as fsext from './components/fs-extension.js';
-import { StringUtils } from './components/utils.js';
-
+import { StringUtils, PromiseUtils } from './components/utils.js';
 import MQTTClient from './components/mqtt-client.js';
 import TelegramBot from './components/telegram-bot.js';
 import ApplicationConfig from './config/application-config.js';
@@ -29,15 +28,20 @@ class Application {
    *
    * @param {*} argv    Command-line arguments
    */
-  constructor(config_path: string) {
+  constructor(argv: any) {
+
+    // Find configuration path
+    let config_path: string = String(argv.c);
+    if (StringUtils.isNullOrEmpty(config_path) && process.env.CONFIG_PATH_DIR)
+      config_path = process.env.CONFIG_PATH_DIR;
     this.config_path = config_path;
+
     this.maplock = new Map();
     this.promises_to_wait = [];
     this.mqtt_client = null;
     this.telegram_bot = null;
     this.doevents_resolve = null;
     this.disposed = false;
-
   }
 
   /**
@@ -162,12 +166,7 @@ class Application {
   * @param {*} delay delay in milliseconds
   */
   wait_for_delay(ms?: number) {
-    return new Promise(function (resolve: Function, reject: Function) {
-
-      setTimeout(function () {
-        resolve();
-      }, ms);
-    })
+    return PromiseUtils.wait_for_delay(ms);
   }
 
   /**
@@ -213,6 +212,9 @@ class Application {
 
     // Release locks
     await fsext.release_locks(this.maplock);
+
+    // Wait for IO process
+    await PromiseUtils.wait_for_delay(250);
 
     this.disposed = true;
   }

@@ -33,6 +33,11 @@
       "message": "Car is now ${value}"
     },
     {
+      "topic": "teslamate/cars/1/geofence",
+      "test": "^(?=\\s*\\S).*$",
+      "message": "Car is now at ${value}"
+    },
+    {
       "topic": "teslamate/cars/1/state",
       "test": "*",
       "message": "State changed to ${value}"

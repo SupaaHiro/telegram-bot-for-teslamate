@@ -2,14 +2,17 @@
 
 import yargs, { config } from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import * as tracer from 'tracer';
 import Application from './src/application.js';
-import { StringUtils, LicenseUtils } from './src/components/utils.js';
+import { LicenseUtils } from './src/components/utils.js';
+import * as fsext from './src/components/fs-extension.js';
 
 /**
  * App entry point -> Called by the parameter parser
  *
  */
 const entryPoint = function () {
+  const logger: tracer.Tracer.Logger = fsext.init_logger();
 
   // Shows author & license info (do not remove)
   LicenseUtils.print();
@@ -28,13 +31,8 @@ const entryPoint = function () {
     .argv;
   if (argv.verbose) console.log('Command line arguments:', JSON.stringify(argv));
 
-  // Find configuration path
-  let config_path: string = String(argv.c);
-  if (StringUtils.isNullOrEmpty(config_path))
-    config_path = process.env.CONFIG_PATH_DIR ?? '';
-
   // Init application
-  const app: Application = new Application(config_path);
+  const app: Application = new Application(argv);
   let exitCode: number = 0;
   app
     .initialize()
@@ -43,7 +41,7 @@ const entryPoint = function () {
       await app.wait_for_tasks();
     })
     .catch(async function (err: Error) {
-      console.error('Application error:', (argv.verbose ? err : err.message));
+      logger.error('Application error:', (argv.verbose ? err : err.message));
       exitCode = 1;
     })
     .finally(async function () {

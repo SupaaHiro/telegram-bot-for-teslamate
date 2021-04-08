@@ -2,14 +2,29 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as lockfile from 'proper-lockfile';
+import * as tracer from 'tracer';
 import { StringUtils } from './utils.js';
 
 const __dirname = process.cwd();
 
-function touch(path: string) {
-  const fileDescriptor = fs.openSync(path, 'a')
+/**
+ * Update the access date of a file or create it if it doesn't exists
+ * 
+ * @param filepath filepath 
+ */
+function touch(filepath: string) {
+  const fileDescriptor = fs.openSync(filepath, 'a')
 
   return fileDescriptor
+}
+
+/**
+ * Tests whether or not the given path exists
+ * 
+ * @param filepath filepath 
+ */
+export function existsSync(filepath: string) {
+  return fs.existsSync(filepath)
 }
 
 /**
@@ -76,6 +91,16 @@ export async function release_locks(maplock: Map<string, any>) {
 }
 
 /**
+ * Get default path for a directory (e.g. config)
+ * 
+ * @param {*} filename filename
+ * @param {*} rootPath config path
+ */
+export function get_default_path(dirname: string) {
+  return path.join(__dirname, dirname);
+}
+
+/**
  * Get config  directory path
  * 
  * @param {*} filename filename
@@ -85,7 +110,7 @@ export function get_config_path(filename: string, rootPath?: string) {
 
   // If no custom path is specified, look into app folder\config
   if (StringUtils.isNullOrEmpty(rootPath))
-    rootPath = path.join(__dirname, 'config');
+    rootPath = this.get_default_path('config');
 
   const fullpath = path.join(rootPath, filename);
   assert.ok(fs.existsSync(fullpath), `Unable to load ${filename} configuration file from directory ${rootPath}!\r\n` +
@@ -103,8 +128,14 @@ export function get_config_path(filename: string, rootPath?: string) {
  */
 export function load_json<T>(filename: string, rootPath: string) {
   const fullpath = get_config_path(filename, rootPath);
-
-  return JSON.parse(fs.readFileSync(fullpath).toString());
+  let json = null;
+  try {
+    json = JSON.parse(fs.readFileSync(fullpath).toString())
+  }
+  catch (err: any) {
+    throw new Error(`Unable to load file ${filename}: ${err.message}`);
+  }
+  return json;
 }
 
 /**
@@ -117,4 +148,25 @@ export function load_txt(filename: string, rootPath: string) {
   const fullpath = get_config_path(filename, rootPath);
 
   return fs.readFileSync(fullpath).toString();
+}
+
+/**
+ * Initialize logger
+ */
+export function init_logger(): tracer.Tracer.Logger {
+  const filepath = path.join(get_default_path('logs'), 'logs.txt');
+  if (fs.existsSync(filepath))
+    fs.unlinkSync(filepath);
+
+  const logger = tracer.console({
+    transport: function (data) {
+      console.log(data.output)
+      console.log(filepath)
+      fs.appendFile(filepath, data.rawoutput + '\n', err => {
+        if (err) throw err
+      })
+    }
+  })
+
+  return logger;
 }

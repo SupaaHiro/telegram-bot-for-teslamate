@@ -53,7 +53,7 @@ export class LicenseUtils {
     let yabe: boolean = false;
 
     console.clear();
-    console.log('Telegram bot for teslamate (v1.0.2)');
+    console.log('Telegram bot for teslamate (v1.0.3)');
     console.log('Copyright (c) Supaahiro - All rights reserved 2021');
     console.log('Private use only, no commercial use allowed');
     console.log('');
@@ -67,4 +67,25 @@ export class LicenseUtils {
       process.exit(0);
     }
   }
+}
+
+/**
+ * Promise utility class
+ */
+export class PromiseUtils {
+
+  /**
+  * Wait for a certain delay
+  * 
+  * @param {*} delay delay in milliseconds
+  */
+  static wait_for_delay(ms?: number) {
+    return new Promise(function (resolve: Function, reject: Function) {
+
+      setTimeout(function () {
+        resolve();
+      }, ms);
+    })
+  }
+
 }

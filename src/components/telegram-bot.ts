@@ -136,13 +136,18 @@ class TelegramBot implements BaseComponent {
    * 
    * @param mqtt_message mqtt message
    */
-  private updateTopicValue(mqtt_message: MQTTMessage) {
+  private updateTopicValue(mqtt_message: MQTTMessage): boolean {
     const subscriptions = this.subscriptions.filter((x) => x.topic === mqtt_message.topic);
-    if (subscriptions.length != 1) return;
+    if (subscriptions.length != 1) return false;
+
     const subscription = subscriptions[0];
+    if (subscription.value == mqtt_message.value) return false;
     subscription.oldValue = subscription.value;
     subscription.value = mqtt_message.value;
+
     console.log(`Updated ${subscription.topic}, value: ${subscription.value}`);
+
+    return true;
   }
 
   /**
@@ -155,7 +160,6 @@ class TelegramBot implements BaseComponent {
    */
   private testAlert(mqtt_message: MQTTMessage, subscription: MQTTSubscription, alert: MQTTAlert) {
     if (alert.topic !== mqtt_message.topic) return false;
-
     const regEx = StringUtils.toRegEx(alert.test);
 
     // First, test regular expression
@@ -241,8 +245,8 @@ class TelegramBot implements BaseComponent {
   async receiveUpdateFromMQTT(mqtt_message: MQTTMessage) {
     assert.ok(mqtt_message, 'message is mandatory')
 
-    this.updateTopicValue(mqtt_message);
-    await this.sendAlerts(mqtt_message);
+    if (this.updateTopicValue(mqtt_message))
+      await this.sendAlerts(mqtt_message);
   }
 
   /**
