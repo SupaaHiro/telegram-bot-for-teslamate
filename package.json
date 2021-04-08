@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "start": "cd dist && node index.js --verbose",
-    "start-dev": "cd dist && node index.js --config-path=../../teslamate-docker-config/telegram-bot-for-teslamate --verbose"
+    "start-dev": "cd dist && node index.js --config-path=../../teslamate-docker-config/telegram-bot-for-teslamate --verbose",
+    "build": "docker build -t supaahiro/telegram-bot-for-teslamate ."
   },
   "author": "Supaahiro (webmaster@supaahiro.org)",
   "license": "SEE LICENSE IN <LICENSE>",
