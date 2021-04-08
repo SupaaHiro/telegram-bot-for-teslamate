@@ -48,11 +48,11 @@ Choice one of the following:
 ```
 
 # Advanced configurations & troubleshooting
-  - MQTT over TSL
+- MQTT over TSL<br>
     If the MQTT broker is not local, be sure to use TSL and setup user/password authentication !
     If you have teslamate with traefik check the docker-compose.yml example under config/teslamate
   
-  - Docker issues    
+- Docker issues<br>
     If the docker crashes try run without detaching the terminal
      docker run supaahiro/telegram-bot-for-teslamate
 
