@@ -5,6 +5,6 @@ RUN npm ci --only=production
 COPY dist/. ./
 COPY LICENSE ./
 COPY readme.md ./
-RUN mkdir /config
+COPY config/telegram-bot-for-teslamate/. ./config
 RUN mkdir /logs
 CMD [ "node", "index.js" ]
