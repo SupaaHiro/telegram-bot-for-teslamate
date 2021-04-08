@@ -1,4 +1,4 @@
-# Telegram bot for teslamate (v1.0.2)
+# Telegram bot for teslamate (v1.0.3)
 Powered by [Supaahiro](https://github.com/SupaaHiro) - *Please feel free to [contact me](https://telegram.me/supaahiro) if you have any questions!*
 
 # Before you start
