@@ -1,31 +1,28 @@
+# Telegram bot for teslamate (v1.0.1)
+Copyright (c) [Supaahiro](https://github.com/SupaaHiro) - All rights reserved 2021
+
 # Before you start
- - Configure a VPS with teslamate with traefik
-    https://www.teslaev.co.uk/how-to-setup-and-run-teslamate-for-free-on-google-cloud/
+- Configure a VPS with teslamate with **traefik**
 
-    Requirements:
-     - VPS must have a static IP
-     - Second level domain with DNS management included
+>Follow this [guide](https://www.teslaev.co.uk/how-to-setup-and-run-teslamate-for-free-on-google-cloud/). A VPS with a static IP and second level domain with DNS management is required, pay attention when you configure Google VPS, only the 'f1-micro' is free! In my case, even with the free tier, I got few extra charges. So I bought a cheap VPS at [contabo](https://contabo.com/en/vps).
 
-    Pay attention when you configure Google VPS, only the f1-micro is free!
-    Even with the free tier, I got few extra charges. So I bought a cheap VPS at contabo https://contabo.com/en/vps/
-
- - Create a telegram account, in case you don't have one yet (https://telegram.org/)
- - Retrieve your chat ID by contacting the IDBot (@myidbot)
- - Create a new bot by contacting the BotFather (@BotFather)
-    Detailed guide here -> https://www.telegram-group.com/en/blog/create-bot-telegram/
- - Modify config/telegram-bot-for-teslamate/telegram.json
- - Modify config/telegram-bot-for-teslamate/mqtt-client.json
+ - Create a [telegram](https://telegram.org/) account, *in case you don't have one yet*.
+ - Retrieve your chat ID by contacting the [IDBot](https://telegram.me/myidbot)
+ - Create a [new bot](https://www.telegram-group.com/en/blog/create-bot-telegram) by contacting the [BotFather](https://telegram.me/botfather) and write down its tocken id.
+ - Edit the configuration files present in config/telegram-bot-for-teslamate, make sure you put the correct info in telegram.json and mqtt-client.json
 
 # Easy Install with docker-compose
-   - Follow this guide (https://docs.teslamate.org/docs/guides/traefik/)
-   - Modify config/.env and config/mosquitto.passwd
-   - Upload config/ into your VPS (e.g. /home/<user>/teslamate)
-   - Execute docker-compose up -d
+ - Follow this guide (https://docs.teslamate.org/docs/guides/traefik/)
+ - Modify config/.env and config/mosquitto.passwd
+ - Upload config/ into your VPS (e.g. /home/<user>/teslamate)
+ - Execute docker-compose up -d
 
-# Use a pre-built docker image
+# Use the pre-built docker image
+```
    docker pull supaahiro/telegram-bot-for-teslamate:latest
    docker cp config/telegram-bot-for-teslamate/. mycontainer:/config/
    docker run -d supaahiro/telegram-bot-for-teslamate
+```
 
 # Build from source code
 ```
