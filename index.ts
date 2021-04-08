@@ -3,13 +3,16 @@
 import yargs, { config } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import Application from './src/application.js';
-import { StringUtils } from './src/components/utils.js';
+import { StringUtils, LicenseUtils } from './src/components/utils.js';
 
 /**
  * App entry point -> Called by the parameter parser
  *
  */
 const entryPoint = function () {
+
+  // Shows author & license info (do not remove)
+  LicenseUtils.print();
 
   // Initialize yargs
   let argv = yargs(hideBin(process.argv))

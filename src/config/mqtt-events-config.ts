@@ -5,5 +5,5 @@ export default interface MQTTEventsConfig {
   mu_distance: string;
   subscriptions: string[];
   alerts: MQTTAlert[];
-  motd: boolean;
+  motd_on_start: boolean;
 }

@@ -18,6 +18,11 @@
       "message": "New software update available: ${value}"
     },
     {
+      "topic": "teslamate/cars/1/state",
+      "test": "online",
+      "message": "${MOTD}"
+    },
+    {
       "topic": "teslamate/cars/1/usable_battery_level",
       "test": "<20",
       "message": "Battery level is below ${test}%"
@@ -48,5 +53,5 @@
       "message": "Doors open"
     }
   ],
-  "motd": true
+  "motd_on_start": false
 }

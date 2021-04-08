@@ -12,6 +12,7 @@ import MQTTEventsConfig from '../config/mqtt-events-config.js';
 import MQTTMessage from './mqtt-message.js';
 import MQTTSubscription from './mqtt-subscription.js';
 import MQTTAlert from './mqtt-alert.js';
+import { runInThisContext } from 'node:vm';
 
 /**
  * Telegram bot
@@ -76,7 +77,7 @@ class TelegramBot implements BaseComponent {
         if (ctx.from.id.toString() !== self.botConfig.bot_owner_id) return;
 
         // Sent MOTD
-        let motd = await this.get_motd();
+        let motd = await this.getMOTD();
         if (!StringUtils.isNullOrEmpty(motd))
           ctx.reply(motd)
       })
@@ -121,108 +122,143 @@ class TelegramBot implements BaseComponent {
   }
 
   /**
-  * Subscribe topics
+  * Subscribe all MQTT topics to MQTT client
   * 
   * @param {*} mqtt_client mqtt client
   */
-  async subscribe(mqtt_client: MQTTClient) {
+  async addSubscriptionsToMQTT(mqtt_client: MQTTClient) {
     assert.ok(mqtt_client, 'mqtt client not initialized')
     this.subscriptions.forEach(element => mqtt_client.subscribe(element.topic));
   }
 
   /**
-  * Receive topics updates
-  * 
-  * @param {*} mqtt_message mqtt message
-  */
-  async update(mqtt_message: MQTTMessage) {
-    assert.ok(mqtt_message, 'message is mandatory')
-
-    // Find subscription and update its value
+   * Find subscription and update its value
+   * 
+   * @param mqtt_message mqtt message
+   */
+  private updateTopicValue(mqtt_message: MQTTMessage) {
     const subscriptions = this.subscriptions.filter((x) => x.topic === mqtt_message.topic);
     if (subscriptions.length != 1) return;
     const subscription = subscriptions[0];
     subscription.oldValue = subscription.value;
     subscription.value = mqtt_message.value;
     console.log(`Updated ${subscription.topic}, value: ${subscription.value}`);
-
-    // Send alert (only if enabled)
-    if (this.alerts_enabled) {
-      const alerts = this.alerts.filter(
-        function (x) {
-          if (x.topic !== mqtt_message.topic) return false;
-
-          const regEx = StringUtils.toRegEx(x.test);
-
-          // First, test regular expression
-          if (regEx) {
-            console.log('Testing regex for', x.topic, 'regex:', regEx, 'value:', mqtt_message.value, 'test:', regEx.test(mqtt_message.value));
-            if (regEx.test(mqtt_message.value)) return true;
-          }
-          // Then, do other tests
-
-          // Test if value can be anything
-          if (x.test === '*')
-            return true;
-
-          // Test if value is below a certain value
-          else if (x.test.startsWith('<')) {
-            if (subscription.enabled && Number(mqtt_message.value) < Number(x.test.replace('<', ''))) {
-              subscription.enabled = false;
-              return true;
-            }
-
-            if (Number(mqtt_message.value) > Number(x.test.replace('<', '')))
-              subscription.enabled = true;
-
-            return false;
-          }
-
-          // Test if value is above a certain value
-          else if (x.test.startsWith('>')) {
-            if (subscription.enabled && Number(mqtt_message.value) > Number(x.test.replace('>', ''))) {
-              subscription.enabled = false;
-              return true;
-            }
-
-            if (Number(mqtt_message.value) < Number(x.test.replace('<', '')))
-              subscription.enabled = true;
-
-            return false;
-          }
-          // Test if value is equal to a certain value
-          else if (x.test === mqtt_message.value)
-            return true;
-
-          return false;
-        });
-      if (alerts.length > 0 && !StringUtils.isNullOrEmpty(alerts[0].message)) {
-        const alert = alerts[0];
-        if (alerts.length != 1)
-          console.log(`Multiple events configured for ${alert.topic}, picking the first one: ${alert.test}`);
-
-        let message = alert.message
-          .replace("${value}", mqtt_message.value)
-          .replace("${test}", alert.test.replace('<', '').replace('>', ''))
-          ;
-        this.send_message(message);
-
-        console.log(`Send alert ${alert.topic}, test: ${alert.test}, value: ${mqtt_message.value}`);
-      }
-    }
   }
 
+  /**
+   * Test if an alert can be tirggered by an mqtt message
+   * 
+   * @param mqtt_message 
+   * @param subscription 
+   * @param alert 
+   * @returns 
+   */
+  private testAlert(mqtt_message: MQTTMessage, subscription: MQTTSubscription, alert: MQTTAlert) {
+    if (alert.topic !== mqtt_message.topic) return false;
+
+    const regEx = StringUtils.toRegEx(alert.test);
+
+    // First, test regular expression
+    if (regEx) {
+      console.log('Testing regex for', alert.topic, 'regex:', regEx, 'value:', mqtt_message.value, 'test:', regEx.test(mqtt_message.value));
+      if (regEx.test(mqtt_message.value)) return true;
+    }
+    // Then, do other tests
+
+    // Test if value can be anything
+    if (alert.test === '*')
+      return true;
+
+    // Test if value is below a certain value
+    else if (alert.test.startsWith('<')) {
+      if (subscription.enabled && Number(mqtt_message.value) < Number(alert.test.replace('<', ''))) {
+        subscription.enabled = false;
+        return true;
+      }
+
+      if (Number(mqtt_message.value) > Number(alert.test.replace('<', '')))
+        subscription.enabled = true;
+
+      return false;
+    }
+
+    // Test if value is above a certain value
+    else if (alert.test.startsWith('>')) {
+      if (subscription.enabled && Number(mqtt_message.value) > Number(alert.test.replace('>', ''))) {
+        subscription.enabled = false;
+        return true;
+      }
+
+      if (Number(mqtt_message.value) < Number(alert.test.replace('<', '')))
+        subscription.enabled = true;
+
+      return false;
+    }
+    // Test if value is equal to a certain value
+    else if (alert.test === mqtt_message.value)
+      return true;
+
+    return false;
+  }
+
+  /**
+  * Send subscription alerts
+  * 
+  * @param mqtt_message mqtt message
+  */
+  private async sendAlerts(mqtt_message: MQTTMessage) {
+    if (!this.alerts_enabled) return;
+
+    // Find subscription
+    const subscriptions = this.subscriptions.filter((x) => x.topic === mqtt_message.topic);
+    if (subscriptions.length != 1) return;
+    const subscription = subscriptions[0];
+
+    // Get suitable alerts
+    const alerts = this.alerts.filter((alert) => this.testAlert(mqtt_message, subscription, alert));
+    if (alerts.length == 0) return;
+
+    // Send alerts
+    const modt = await this.getMOTD();
+    alerts.forEach((alert) => {
+      let message = alert.message
+        .replace("${value}", mqtt_message.value)
+        .replace("${test}", alert.test.replace('<', '').replace('>', ''))
+        .replace("${MOTD}", modt)
+        ;
+      this.send_message(message);
+
+      console.log(`Send alert ${alert.topic}, test: ${alert.test}, value: ${mqtt_message.value}`);
+    });
+
+  }
+
+  /**
+  * Receive a topic update from MQTT client
+  * 
+  * @param {*} mqtt_message mqtt message
+  */
+  async receiveUpdateFromMQTT(mqtt_message: MQTTMessage) {
+    assert.ok(mqtt_message, 'message is mandatory')
+
+    this.updateTopicValue(mqtt_message);
+    await this.sendAlerts(mqtt_message);
+  }
+
+  /**
+   * Returns TRUE if has to send a MOTD on start
+   * @returns 
+   */
+  hasToSendMOTDStart(): boolean {
+    return this.mqttEventsConfig.motd_on_start;
+  }
 
   /**
   * Get MOTD
   * 
   */
-  async get_motd() {
-    if (!this.mqttEventsConfig.motd) return '';
-
-    // Sent MOTD
+  async getMOTD() {
     let motd = this.app.load_txt('telegram-motd.txt');
-
     motd = StringUtils.replaceAll(motd, '${mu_distance}', this.mqttEventsConfig.mu_distance);
     motd = StringUtils.replaceAll(motd, '${mu_temperature}', this.mqttEventsConfig.mu_temperature);
 
@@ -234,9 +270,9 @@ class TelegramBot implements BaseComponent {
   /**
    * Send MOTD
    */
-  async send_motd() {
+  async sendMOTD() {
     // Sent MOTD
-    let motd = await this.get_motd();
+    let motd = await this.getMOTD();
     if (!StringUtils.isNullOrEmpty(motd))
       await this.send_message(motd);
   }

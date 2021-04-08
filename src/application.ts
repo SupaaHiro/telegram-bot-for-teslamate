@@ -75,14 +75,17 @@ class Application {
       await this.initialize_telegram_bot();
       await this.initialize_mqtt_client(this.telegram_bot);
 
-      setTimeout(async function () {
-        // Enable alerts
+      // Enable alerts
+      setTimeout(function () {
         self.telegram_bot.alerts_enabled = true;
+      }, 250);
 
-        // Send MOTD (if enabled)
-        await self.telegram_bot.send_motd()
-
-      }, Application._MOTD_DELAY_MS);
+      // Send MOTD if enabled
+      if (self.telegram_bot.hasToSendMOTDStart()) {
+        setTimeout(async function () {
+          await self.telegram_bot.sendMOTD()
+        }, Application._MOTD_DELAY_MS);
+      }
     }
     catch (ex: unknown) {
       throw ex;
@@ -131,10 +134,10 @@ class Application {
       this.mqtt_client = mqtt_client;
 
       mqtt_client.on('connect', function (host) {
-        telegram_bot.subscribe(this.mqtt_client);
+        telegram_bot.addSubscriptionsToMQTT(this.mqtt_client);
       })
       mqtt_client.on('message', function (e) {
-        telegram_bot.update(e);
+        telegram_bot.receiveUpdateFromMQTT(e);
       })
 
       await this.mqtt_client.exec();
