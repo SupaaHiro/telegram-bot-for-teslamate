@@ -1,5 +1,5 @@
 # Telegram bot for teslamate (v1.0.2)
-Copyright (c) [Supaahiro](https://github.com/SupaaHiro) - All rights reserved 2021
+Copyright (c) [Supaahiro](https://telegram.me/supaahiro) - All rights reserved 2021
 
 # Before you start
 - Configure a VPS with teslamate with **traefik**
