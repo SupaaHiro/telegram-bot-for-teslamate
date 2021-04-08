@@ -110,7 +110,7 @@ export function get_config_path(filename: string, rootPath?: string) {
 
   // If no custom path is specified, look into app folder\config
   if (StringUtils.isNullOrEmpty(rootPath))
-    rootPath = this.get_default_path('config');
+    rootPath = get_default_path('config');
 
   const fullpath = path.join(rootPath, filename);
   assert.ok(fs.existsSync(fullpath), `Unable to load ${filename} configuration file from directory ${rootPath}!\r\n` +
