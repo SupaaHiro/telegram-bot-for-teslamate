@@ -1,6 +1,6 @@
 export default interface MQTTClientConfig {
   host: string;
-  port: number;
+  port: string;
   username: string;
   password: string;
 }

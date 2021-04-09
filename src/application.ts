@@ -82,7 +82,7 @@ class Application {
       // Enable alerts
       setTimeout(function () {
         self.telegram_bot.alerts_enabled = true;
-      }, 250);
+      }, 500);
 
       // Send MOTD if enabled
       if (self.telegram_bot.hasToSendMOTDStart()) {

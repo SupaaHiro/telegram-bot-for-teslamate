@@ -88,10 +88,10 @@ class TelegramBot implements BaseComponent {
 
       console.log('Bot initialization completed');
 
-    } catch (ex: unknown) {
+    } catch (err: any) {
       this.bot = null;
-      console.log('Bot initialization failed');
-      throw ex;
+
+      throw new Error(`Bot initialization failed: ${err.message}`);
     }
   }
 
@@ -151,7 +151,7 @@ class TelegramBot implements BaseComponent {
   }
 
   /**
-   * Test if an alert can be tirggered by an mqtt message
+   * Test if an alert can be triggered by an mqtt message
    * 
    * @param mqtt_message 
    * @param subscription 

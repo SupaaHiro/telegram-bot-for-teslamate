@@ -7,8 +7,15 @@ services:
     depends_on:
       - teslamate
       - mosquitto
+    environment:
+      - MQTT_PROTOCOL=${MQTT_PROTOCOL}
+      - MQTT_HOST=${MQTT_HOST}
+      - MQTT_PORT=${MQTT_PORT}
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
     volumes:
       - ./telegram-bot-for-teslamate:/telegram-bot-for-teslamate/config
+      - ./telegram-bot-for-teslamate-logs:/telegram-bot-for-teslamate/logs
   teslamate:
     image: teslamate/teslamate:latest
     restart: always
@@ -19,7 +26,7 @@ services:
       - DATABASE_PASS=${TM_DB_PASS}
       - DATABASE_NAME=${TM_DB_NAME}
       - DATABASE_HOST=database
-      - MQTT_HOST=mosquitto
+      - MQTT_HOST=${MQTT_HOST}
       - MQTT_USERNAME=${MQTT_USERNAME}
       - MQTT_PASSWORD=${MQTT_PASSWORD}
       - VIRTUAL_HOST=${FQDN_TM}
@@ -89,9 +96,7 @@ services:
     ports:
       - 127.0.0.1:1883:1883
     volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./mosquitto.passwd:/mosquitto/config/mosquitto.passwd
-      - mosquitto-conf:/mosquitto/config
+      - ./mosquitto-conf:/mosquitto/config
       - mosquitto-data:/mosquitto/data
     labels:
       - "traefik.enable=true"

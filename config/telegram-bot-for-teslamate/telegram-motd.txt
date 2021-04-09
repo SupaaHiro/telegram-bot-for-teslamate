@@ -5,5 +5,3 @@ ${teslamate/cars/1/display_name} is ${teslamate/cars/1/state} and SOC level is $
 Temperature inside is ${teslamate/cars/1/inside_temp} ${mu_temperature}, and outside ${teslamate/cars/1/outside_temp} ${mu_distance}
 
 Software version is ${teslamate/cars/1/version}, Odometer ${teslamate/cars/1/odometer} ${mu_distance}
-
-This is art. You will hear a buzzer. When you hear the buzzer, stare at the art. [BUZZER]
