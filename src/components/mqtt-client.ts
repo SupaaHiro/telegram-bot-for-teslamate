@@ -44,40 +44,20 @@ class MQTTClient extends EventEmitter implements BaseComponent {
 
     // Fill config from environment variables
     const env_mqtt_protocol = process.env.MQTT_PROTOCOL;
-    if (config.host.includes('${MQTT_PROTOCOL}')) {
-      assert.ok(!StringUtils.isNullOrEmpty(env_mqtt_protocol), 'MQTT client: environment variable MQTT_PROTOCOL not set !');
-
-      config.host = config.host.replace('${MQTT_PROTOCOL}', env_mqtt_protocol);
-    }
     const env_mqtt_host = process.env.MQTT_HOST;
-    if (config.host.includes('${MQTT_HOST}')) {
-      assert.ok(!StringUtils.isNullOrEmpty(env_mqtt_host), 'MQTT client: environment variable MQTT_HOST not set !');
-
-      config.host = config.host.replace('${MQTT_HOST}', env_mqtt_host);
-    }
     const env_mqtt_port = process.env.MQTT_PORT;
-    if (config.port.includes('${MQTT_PORT}')) {
-      assert.ok(!StringUtils.isNullOrEmpty(env_mqtt_port), 'MQTT client: environment variable MQTT_PORT not set !');
-
-      config.port = config.port.replace('${MQTT_PORT}', env_mqtt_port);
-    }
     const env_mqtt_username = process.env.MQTT_USERNAME;
-    if (config.username.includes('${MQTT_USERNAME}')) {
-      if (!env_mqtt_username)
-        config.username = '';
-      else
-        config.username = config.username.replace('${MQTT_USERNAME}', env_mqtt_username);
-    }
     const env_mqtt_password = process.env.MQTT_PASSWORD;
-    if (config.password.includes('${MQTT_PASSWORD}')) {
-      if (!env_mqtt_password)
-        config.password = '';
-      else
-        config.password = config.password.replace('${MQTT_PASSWORD}', env_mqtt_password);
-    }
-
-    assert.ok(MQTTClient._VALIDATE_HOST.test(config.host), `MQTT client: host ${config.host} not valid ! Check mqtt-client.json configuration`)
-    assert.ok(Number(config.port) > 0 && Number(config.port) < 65535, `MQTT client: port ${config.port} not valid ! Check mqtt-client.json configuration`)
+    if (!StringUtils.isNullOrEmpty(env_mqtt_protocol))
+      config.protocol = env_mqtt_protocol;
+    if (!StringUtils.isNullOrEmpty(env_mqtt_host))
+      config.host = env_mqtt_host;
+    if (!StringUtils.isNullOrEmpty(env_mqtt_port))
+      config.port = env_mqtt_port;
+    if (env_mqtt_username)
+      config.username = env_mqtt_username;
+    if (env_mqtt_password)
+      config.password = env_mqtt_password;
 
     return config;
   }
@@ -111,8 +91,14 @@ class MQTTClient extends EventEmitter implements BaseComponent {
 
     const self = this;
     try {
-      const host = self.config.host;
-      const options = { port: self.config.port, username: self.config.username, password: self.config.password, rejectUnauthorized: false, connectTimeout: 10000 };
+      let host = self.config.host, port = self.config.port;
+      if (!StringUtils.isNullOrEmpty(self.config.protocol))
+        host = self.config.protocol + '://' + self.config.host;
+
+      const options = { port: port, username: self.config.username, password: self.config.password, rejectUnauthorized: false, connectTimeout: 10000 };
+
+      assert.ok(MQTTClient._VALIDATE_HOST.test(host), `MQTT client: host ${host} not valid ! Check mqtt-client.json configuration`)
+      assert.ok(Number(port) > 0 && Number(port) < 65535, `MQTT client: port ${port} not valid ! Check mqtt-client.json configuration`)
 
       console.log(`Attemping connection to ${host}:${options.port} ...`);
 

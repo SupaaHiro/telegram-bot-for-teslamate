@@ -1,6 +1,7 @@
 {
-  "host": "${MQTT_PROTOCOL}://${MQTT_HOST}",
-  "port": "${MQTT_PORT}",
-  "username": "${MQTT_USERNAME}",
-  "password": "${MQTT_PASSWORD}"
+  "protocol": "",
+  "host": "",
+  "port": "",
+  "username": "",
+  "password": ""
 }
