@@ -53,7 +53,7 @@ export class LicenseUtils {
     let yabe: boolean = false;
 
     console.clear();
-    console.log('Telegram bot for teslamate (v1.0.4)');
+    console.log('Telegram bot for teslamate (v1.0.5)');
     console.log('Copyright (c) Supaahiro - All rights reserved 2021');
     console.log('Private use only, no commercial use allowed');
     console.log('');

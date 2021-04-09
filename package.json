@@ -1,13 +1,13 @@
 {
   "name": "telegram-bot-for-teslamate",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Telegram bot for teslamate",
   "private": true,
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "cd dist && node index.js --verbose",
-    "start-dev": "cd dist && node index.js --config-path=../../teslamate-docker-config/telegram-bot-for-teslamate --verbose",
+    "start-dev": "cd dist && node index.js --config-path=../../config --verbose",
     "build": "docker build -t supaahiro/telegram-bot-for-teslamate ."
   },
   "author": "Supaahiro (webmaster@supaahiro.org)",

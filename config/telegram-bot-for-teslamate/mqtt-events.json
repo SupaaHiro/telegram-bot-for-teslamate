@@ -19,7 +19,7 @@
     },
     {
       "topic": "teslamate/cars/1/state",
-      "test": "online",
+      "test": "asleep->online",
       "message": "${MOTD}"
     },
     {
@@ -29,18 +29,13 @@
     },
     {
       "topic": "teslamate/cars/1/state",
-      "test": "(?:online|asleep)",
+      "test": "(?:online|asleep|suspended)",
       "message": "Car is now ${value}"
     },
     {
       "topic": "teslamate/cars/1/geofence",
-      "test": "^(?=\\s*\\S).*$",
+      "test": "-z",
       "message": "Car is now at ${value}"
-    },
-    {
-      "topic": "teslamate/cars/1/state",
-      "test": "*",
-      "message": "State changed to ${value}"
     },
     {
       "topic": "teslamate/cars/1/trunk_open",

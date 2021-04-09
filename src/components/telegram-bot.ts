@@ -132,22 +132,22 @@ class TelegramBot implements BaseComponent {
   }
 
   /**
-   * Find subscription and update its value
+   * Find and update subscription value
    * 
    * @param mqtt_message mqtt message
    */
-  private updateTopicValue(mqtt_message: MQTTMessage): boolean {
+  private updateTopicValue(mqtt_message: MQTTMessage): MQTTSubscription {
     const subscriptions = this.subscriptions.filter((x) => x.topic === mqtt_message.topic);
-    if (subscriptions.length != 1) return false;
+    if (subscriptions.length != 1) return null;
 
     const subscription = subscriptions[0];
-    if (subscription.value == mqtt_message.value) return false;
+    if (subscription.value == mqtt_message.value) return null;
     subscription.oldValue = subscription.value;
     subscription.value = mqtt_message.value;
 
-    console.log(`Updated ${subscription.topic}, value: ${subscription.value}`);
+    console.log(`Updated ${subscription.topic}, value: ${subscription.oldValue}->${subscription.value}`);
 
-    return true;
+    return subscription;
   }
 
   /**
@@ -172,6 +172,18 @@ class TelegramBot implements BaseComponent {
     // Test if value can be anything
     if (alert.test === '*')
       return true;
+
+    // Test if value is not empty
+    if (alert.test === '-z' && !StringUtils.isNullOrEmpty(mqtt_message.value))
+      return true;
+
+    // Test if value changed from A to B
+    if (alert.test.includes('->')) {
+      const arr = alert.test.split('->');
+      if (arr.length == 2 && arr[1] === subscription.oldValue && arr[0] === subscription.value) {
+        return true;
+      }
+    }
 
     // Test if value is below a certain value
     else if (alert.test.startsWith('<')) {
@@ -210,13 +222,8 @@ class TelegramBot implements BaseComponent {
   * 
   * @param mqtt_message mqtt message
   */
-  private async sendAlerts(mqtt_message: MQTTMessage) {
+  private async sendAlerts(mqtt_message: MQTTMessage, subscription: MQTTSubscription) {
     if (!this.alerts_enabled) return;
-
-    // Find subscription
-    const subscriptions = this.subscriptions.filter((x) => x.topic === mqtt_message.topic);
-    if (subscriptions.length != 1) return;
-    const subscription = subscriptions[0];
 
     // Get suitable alerts
     const alerts = this.alerts.filter((alert) => this.testAlert(mqtt_message, subscription, alert));
@@ -245,8 +252,9 @@ class TelegramBot implements BaseComponent {
   async receiveUpdateFromMQTT(mqtt_message: MQTTMessage) {
     assert.ok(mqtt_message, 'message is mandatory')
 
-    if (this.updateTopicValue(mqtt_message))
-      await this.sendAlerts(mqtt_message);
+    const subscription = this.updateTopicValue(mqtt_message);
+    if (subscription)
+      await this.sendAlerts(mqtt_message, subscription);
   }
 
   /**
